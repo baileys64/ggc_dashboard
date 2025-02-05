@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 # Load your Garage Gym Competition CSV file
-@st.cache
+@st.cache_data
 def load_data():
     # Replace 'your_file.csv' with your actual CSV file path
     return pd.read_csv('ggc_fall24.csv')
