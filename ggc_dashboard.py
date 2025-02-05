@@ -35,7 +35,7 @@ if gender != "All":
     filtered_data = filtered_data[filtered_data["Gender"] == gender]
 
 if lift_category in data.columns:
-    filtered_data = filtered_data[["Name", "Gender", lift_category]]
+    filtered_data = filtered_data[["Gender", lift_category]]
 
 # Calculate percentile if a value is entered
 if entered_value and lift_category in filtered_data.columns:
