@@ -6,7 +6,7 @@ import numpy as np
 @st.cache_data
 def load_data():
     # Replace 'your_file.csv' with your actual CSV file path
-    return pd.read_csv('ggc_fall24.csv')
+    return pd.read_csv('ggc_compile_test.csv')
 
 # Load data
 data = load_data()
