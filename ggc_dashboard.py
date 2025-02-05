@@ -19,7 +19,7 @@ unit = st.sidebar.selectbox("Select unit:", ["", "Pounds", "Kilograms"])
 gender = st.sidebar.selectbox("Select gender:", ["All", "Male", "Female"])
 lift_category = st.sidebar.selectbox(
     "Select lift category:",
-    ["Bench", "Squat", "Deadlift", "Total", "Improvement"]
+    ["Bench", "Squat", "Deadlift", "Total"]
 )
 
 # Main title
