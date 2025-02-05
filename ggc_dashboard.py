@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 
 # Load your Garage Gym Competition CSV file
 @st.cache_data
@@ -25,8 +26,8 @@ lift_category = st.sidebar.selectbox(
 st.title("Garage Gym Competition Dashboard")
 
 # Display raw data
-st.subheader("Raw Data")
-st.dataframe(data)
+# st.subheader("Raw Data")
+# st.dataframe(data)
 
 # Filter data based on selections
 filtered_data = data.copy()
@@ -57,11 +58,24 @@ if entered_value and lift_category in filtered_data.columns:
             f"The entered value of **{entered_value:.2f} ({unit})** corresponds to the "
             f"**{entered_percentile:.2f}th percentile** for {lift_category}."
         )
+
+    # Histogram with Highlighted Value
+        st.subheader(f"Histogram of {lift_category} Weights")
+        
+        fig, ax = plt.subplots(figsize=(8, 5))
+        ax.hist(filtered_data[lift_category], bins=20, alpha=0.7, color='blue', edgecolor='black')
+        ax.axvline(entered_value, color='red', linestyle='dashed', linewidth=2, label=f"Your Weight: {entered_value:.2f} lbs")
+        ax.set_xlabel(f"{lift_category} Weight (lbs)")
+        ax.set_ylabel("Frequency")
+        ax.set_title(f"Distribution of {lift_category} Weights")
+        ax.legend()
+
+        st.pyplot(fig)
     except ValueError:
         st.error("Please enter a valid numerical value.")
 else:
     st.write("Enter a value and select a category to calculate the percentile.")
 
 # Display filtered data
-st.subheader("Filtered Data")
-st.dataframe(filtered_data)
+# st.subheader("Filtered Data")
+# st.dataframe(filtered_data)
