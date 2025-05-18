@@ -3,79 +3,48 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Load your Garage Gym Competition CSV file
+# Load the CSV (update this path or use st.file_uploader for deployment)
 @st.cache_data
 def load_data():
-    # Replace 'your_file.csv' with your actual CSV file path
-    return pd.read_csv('ggc_compile_test.csv')
+    df = pd.read_csv("ggc_cummulative_values_public.csv")  # Replace with your actual CSV file
+    return df
 
-# Load data
-data = load_data()
+df = load_data()
 
-# Sidebar filters
-st.sidebar.header("Filters")
-entered_value = st.sidebar.text_input("Enter a value (e.g., weight):", "")
-unit = st.sidebar.selectbox("Select unit:", ["", "Pounds", "Kilograms"])
-gender = st.sidebar.selectbox("Select gender:", ["All", "Male", "Female"])
-lift_category = st.sidebar.selectbox(
-    "Select lift category:",
-    ["Bench", "Squat", "Deadlift", "Total"]
-)
+# Sidebar inputs
+st.title("🏋️ Garage Gym Competition Percentile Dashboard")
 
-# Main title
-st.title("Garage Gym Competition Dashboard")
+lift_type = st.selectbox("Select a lift:", ["Squat", "Bench", "Deadlift", "Total"])
+unit = st.selectbox("Select unit:", ["lbs", "kg"])
+gender = st.selectbox("Select gender:", ["Male", "Female"])
 
-# Display raw data
-# st.subheader("Raw Data")
-# st.dataframe(data)
+input_weight = st.number_input(f"Enter your {lift_type} weight ({unit}):", min_value=0.0, step=1.0)
 
-# Filter data based on selections
-filtered_data = data.copy()
+# Convert data and filter
+filtered_df = df[df["Gender"].str.lower() == gender.lower()].copy()
 
-if gender != "All":
-    filtered_data = filtered_data[filtered_data["Gender"] == gender]
-
-if lift_category in data.columns:
-    filtered_data = filtered_data[["Gender", lift_category]]
-
-# Calculate percentile if a value is entered
-if entered_value and lift_category in filtered_data.columns:
-    try:
-        entered_value = float(entered_value)
-        # Convert entered value if needed
-        if unit == "Kilograms":
-            entered_value *= 2.20462  # Convert kilograms to pounds
-
-        # Calculate percentile
-        percentiles = np.percentile(filtered_data[lift_category].dropna(), np.arange(0, 101))
-        entered_percentile = (
-            sum(entered_value > percentiles) / 100 * 100
-        )
-
-        # Display the percentile
-        st.subheader(f"Percentile for {lift_category}")
-        st.write(
-            f"The entered value of **{entered_value:.2f} ({unit})** corresponds to the "
-            f"**{entered_percentile:.2f}th percentile** for {lift_category}."
-        )
-
-    # Histogram with Highlighted Value
-        st.subheader(f"Histogram of {lift_category} Weights")
-        
-        fig, ax = plt.subplots(figsize=(8, 5))
-        ax.hist(filtered_data[lift_category], bins=20, alpha=0.7, color='blue', edgecolor='black')
-        ax.axvline(entered_value, color='red', linestyle='dashed', linewidth=2, label=f"Your Weight: {entered_value:.2f} lbs")
-        ax.set_xlabel(f"{lift_category} Weight (lbs)")
-        ax.set_ylabel("Frequency")
-        ax.set_title(f"Distribution of {lift_category} Weights")
-        ax.legend()
-
-        st.pyplot(fig)
-    except ValueError:
-        st.error("Please enter a valid numerical value.")
+if unit == "kg":
+    filtered_df[lift_type] = filtered_df[lift_type] / 2.20462  # Convert lbs to kg
+    display_weight = input_weight
 else:
-    st.write("Enter a value and select a category to calculate the percentile.")
+    display_weight = input_weight
 
-# Display filtered data
-# st.subheader("Filtered Data")
-# st.dataframe(filtered_data)
+# Calculate percentile
+if not filtered_df.empty:
+    lift_values = filtered_df[lift_type].dropna()
+    percentile = np.round((lift_values < display_weight).mean() * 100, 2)
+
+    st.markdown(f"### 📊 Percentile: You are in the **{percentile}th** percentile for {gender.lower()}s in {lift_type.lower()}.")
+
+    # Plot histogram
+    fig, ax = plt.subplots()
+    ax.hist(lift_values, bins=30, edgecolor='black', alpha=0.7)
+    ax.axvline(display_weight, color='red', linestyle='dashed', linewidth=2)
+    ax.set_title(f'{lift_type} Distribution ({unit})')
+    ax.set_xlabel(f'{lift_type} Weight ({unit})')
+    ax.set_ylabel('Count')
+    st.pyplot(fig)
+
+else:
+    st.warning("No data available for selected gender.")
+
