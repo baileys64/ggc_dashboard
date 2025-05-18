@@ -1,4 +1,4 @@
-import streamlit as st
+_import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 # Load the CSV (update this path or use st.file_uploader for deployment)
 @st.cache_data
 def load_data():
-    df = pd.read_csv("ggc_cummulative_values_public.csv")  # Replace with your actual CSV file
+    df = pd.read_csv("combined_ggc_results_public.csv")  # Replace with your actual CSV file
     return df
 
 df = load_data()
