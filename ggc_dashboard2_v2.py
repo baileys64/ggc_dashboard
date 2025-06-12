@@ -21,6 +21,28 @@ def extract_year_season(comp):
 def load_data():
     url = st.secrets["data"]["sheet_url"]
     return pd.read_csv(url)
+# Parse season and year
+    year_season_df = df["Competition"].apply(extract_year_season)
+    year_season_df.columns = ['parsed_year', 'parsed_season']
+    df['parsed_year'] = year_season_df['parsed_year']
+    df['parsed_season'] = year_season_df['parsed_season']
+
+    # Assume Spring if only one competition in that year
+    season_counts = df.groupby('parsed_year')['parsed_season'].nunique()
+    single_season_years = season_counts[season_counts == 1].index
+
+    df['parsed_season'] = df.apply(
+        lambda row: 'Spring' if pd.isna(row['parsed_season']) and row['parsed_year'] in single_season_years
+        else row['parsed_season'],
+        axis=1
+    )
+
+    season_order_map = {"Spring": 0, "Fall": 1}
+    df['season_order'] = df['parsed_season'].map(season_order_map).fillna(-1).astype(int)
+    df['year'] = df['parsed_year'].fillna(0).astype(int)
+
+    return df
+
 
 df = load_data()
 
@@ -28,6 +50,7 @@ st.title("🔒 GGC Individual Progress Dashboard")
 
 # --- STEP 1: Filter to 2024 Fall competition only
 fall_2024_df = df[df["Competition"] == "2024 Fall"]
+fall_2024_df = fall_2024_df[fall_2024_df['Private']=='Please publish my results']
 
 # --- STEP 2: Get handles from that competition
 fall_handles = sorted(fall_2024_df['instagram_handle'].dropna().unique())
@@ -47,7 +70,21 @@ user_row = fall_handle_df[fall_handle_df["first_name"] == first_name].iloc[0]
 user_id = user_row["GGC Unique ID"]
 
 # --- STEP 5: Get full history using Unique_ID
-user_data = df[df["GGC Unique ID"] == user_id].dropna(subset=["Competition"])
+# Get full history for that user
+user_data = df[df["GGC Unique ID"] == user_id].dropna(subset=["Competition"]).copy()
+
+# Parse year/season again for sorting if needed
+user_data[['parsed_year', 'parsed_season']] = user_data["Competition"].apply(extract_year_season)
+season_counts = df.groupby('parsed_year')['parsed_season'].nunique()
+single_season_years = season_counts[season_counts == 1].index
+user_data['parsed_season'] = user_data.apply(
+    lambda row: 'Spring' if pd.isna(row['parsed_season']) and row['parsed_year'] in single_season_years
+    else row['parsed_season'],
+    axis=1
+)
+season_order_map = {"Spring": 0, "Fall": 1}
+user_data['season_order'] = user_data['parsed_season'].map(season_order_map).fillna(-1).astype(int)
+user_data['year'] = user_data['parsed_year'].fillna(0).astype(int)
 
 
 # --- User selects lift and unit
