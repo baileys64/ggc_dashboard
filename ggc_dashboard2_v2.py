@@ -16,25 +16,13 @@ def extract_year_season(comp):
         season_clean = season.capitalize() if season else None
         return pd.Series([year, season_clean])
     return pd.Series([None, None])
-
+    
 @st.cache_data
 def load_data():
-   import re
-
-    url = st.secrets["data"]["sheet_url"]
+   url = st.secrets["data"]["sheet_url"]
     df = pd.read_csv(url)
 
-    # Extract year and season
-    def extract_year_season(comp):
-        match = re.search(r'(Spring|Fall)?\s*(\d{4})', str(comp), re.IGNORECASE)
-        if match:
-            season = match.group(1)
-            year = int(match.group(2))
-            season_clean = season.capitalize() if season else None
-            return pd.Series([year, season_clean])
-        return pd.Series([None, None])
-
-    # Apply and assign columns
+    # Apply year/season parsing
     parsed = df["Competition"].apply(extract_year_season)
     parsed.columns = ["parsed_year", "parsed_season"]
     df["parsed_year"] = parsed[0]
@@ -55,12 +43,8 @@ def load_data():
     df["season_order"] = df["parsed_season"].map(season_order_map).fillna(-1).astype(int)
     df["year"] = df["parsed_year"].fillna(0).astype(int)
 
-    # DEBUG OUTPUT
-    st.write("✅ Columns in df:", df.columns.tolist())
-    st.write("🧪 Sample values from df[['Competition', 'parsed_year', 'parsed_season', 'year', 'season_order']]:")
-    st.write(df[["Competition", "parsed_year", "parsed_season", "year", "season_order"]].head())
-
     return df
+
 
 
 df = load_data()
