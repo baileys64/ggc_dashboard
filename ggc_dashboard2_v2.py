@@ -21,13 +21,13 @@ def extract_year_season(comp):
 def load_data():
     url = st.secrets["data"]["sheet_url"]
     return pd.read_csv(url)
-# Parse season and year
-    year_season_df = df["Competition"].apply(extract_year_season)
-    year_season_df.columns = ['parsed_year', 'parsed_season']
-    df['parsed_year'] = year_season_df['parsed_year']
-    df['parsed_season'] = year_season_df['parsed_season']
 
-    # Assume Spring if only one competition in that year
+    # Extract year/season columns
+    parsed = df["Competition"].apply(extract_year_season)
+    parsed.columns = ['parsed_year', 'parsed_season']
+    df[['parsed_year', 'parsed_season']] = parsed
+
+    # Fill in missing seasons
     season_counts = df.groupby('parsed_year')['parsed_season'].nunique()
     single_season_years = season_counts[season_counts == 1].index
 
