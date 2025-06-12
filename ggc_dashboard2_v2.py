@@ -19,7 +19,7 @@ def extract_year_season(comp):
     
 @st.cache_data
 def load_data():
-   url = st.secrets["data"]["sheet_url"]
+    url = st.secrets["data"]["sheet_url"]
     df = pd.read_csv(url)
 
     # Apply year/season parsing
