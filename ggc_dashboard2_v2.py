@@ -44,10 +44,10 @@ else:
 
 # --- STEP 4: Get Unique_ID using handle + first_name from Fall 2024 only
 user_row = fall_handle_df[fall_handle_df["first_name"] == first_name].iloc[0]
-user_id = user_row["GGC Unique_ID"]
+user_id = user_row["GGC Unique ID"]
 
 # --- STEP 5: Get full history using Unique_ID
-user_data = df[df["GGC Unique_ID"] == user_id].dropna(subset=["Competition"])
+user_data = df[df["GGC Unique ID"] == user_id].dropna(subset=["Competition"])
 
 
 # --- User selects lift and unit
