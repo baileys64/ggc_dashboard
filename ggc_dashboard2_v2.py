@@ -122,7 +122,7 @@ st.dataframe(table_data, use_container_width=True)
 
 # Line plot of progress
 st.markdown("### 📈 Progress Over Time")
-fig, ax = plt.subplots()
+fig, ax = plt.subplots(figsize=(10, 5))
 ax.plot(table_data["Competition"], table_data[f"{lift} ({unit})"], marker='o', linewidth=2)
 ax.set_xlabel("Competition")
 ax.set_ylabel(f"{lift} ({unit})")
