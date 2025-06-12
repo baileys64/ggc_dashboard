@@ -19,27 +19,46 @@ def extract_year_season(comp):
 
 @st.cache_data
 def load_data():
+   import re
+
     url = st.secrets["data"]["sheet_url"]
-    return pd.read_csv(url)
+    df = pd.read_csv(url)
 
-    # Extract year/season columns
+    # Extract year and season
+    def extract_year_season(comp):
+        match = re.search(r'(Spring|Fall)?\s*(\d{4})', str(comp), re.IGNORECASE)
+        if match:
+            season = match.group(1)
+            year = int(match.group(2))
+            season_clean = season.capitalize() if season else None
+            return pd.Series([year, season_clean])
+        return pd.Series([None, None])
+
+    # Apply and assign columns
     parsed = df["Competition"].apply(extract_year_season)
-    parsed.columns = ['parsed_year', 'parsed_season']
-    df[['parsed_year', 'parsed_season']] = parsed
+    parsed.columns = ["parsed_year", "parsed_season"]
+    df["parsed_year"] = parsed[0]
+    df["parsed_season"] = parsed[1]
 
-    # Fill in missing seasons
-    season_counts = df.groupby('parsed_year')['parsed_season'].nunique()
+    # Handle single-season years
+    season_counts = df.groupby("parsed_year")["parsed_season"].nunique()
     single_season_years = season_counts[season_counts == 1].index
 
-    df['parsed_season'] = df.apply(
-        lambda row: 'Spring' if pd.isna(row['parsed_season']) and row['parsed_year'] in single_season_years
-        else row['parsed_season'],
+    df["parsed_season"] = df.apply(
+        lambda row: "Spring" if pd.isna(row["parsed_season"]) and row["parsed_year"] in single_season_years
+        else row["parsed_season"],
         axis=1
     )
 
+    # Add sorting columns
     season_order_map = {"Spring": 0, "Fall": 1}
-    df['season_order'] = df['parsed_season'].map(season_order_map).fillna(-1).astype(int)
-    df['year'] = df['parsed_year'].fillna(0).astype(int)
+    df["season_order"] = df["parsed_season"].map(season_order_map).fillna(-1).astype(int)
+    df["year"] = df["parsed_year"].fillna(0).astype(int)
+
+    # DEBUG OUTPUT
+    st.write("✅ Columns in df:", df.columns.tolist())
+    st.write("🧪 Sample values from df[['Competition', 'parsed_year', 'parsed_season', 'year', 'season_order']]:")
+    st.write(df[["Competition", "parsed_year", "parsed_season", "year", "season_order"]].head())
 
     return df
 
