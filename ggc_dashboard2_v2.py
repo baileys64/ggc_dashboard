@@ -19,9 +19,8 @@ def extract_year_season(comp):
 
 @st.cache_data
 def load_data():
-    base64_string = st.secrets["data"]["csv_base64"]
-    decoded = base64.b64decode(base64_string)
-    return pd.read_csv(io.BytesIO(decoded))
+    url = st.secrets["data"]["sheet_url"]
+    return pd.read_csv(url)
 
 df = load_data()
 
