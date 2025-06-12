@@ -3,7 +3,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import re
-
+import base64
+import io
 
 st.set_page_config(page_title="GGC Individual Progress Dashboard", layout="wide")
 
@@ -18,7 +19,9 @@ def extract_year_season(comp):
 
 @st.cache_data
 def load_data():
-    return pd.read_csv(st.secrets["data"]["private_path"])
+    base64_string = st.secrets["data"]["csv_base64"]
+    decoded = base64.b64decode(base64_string)
+    return pd.read_csv(io.BytesIO(decoded))
 
 df = load_data()
 
