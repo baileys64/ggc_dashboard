@@ -75,7 +75,7 @@ user_data = df[df["GGC Unique ID"] == user_id].dropna(subset=["Competition"]).co
 
 # Parse year/season again for sorting if needed
 user_data[['parsed_year', 'parsed_season']] = user_data["Competition"].apply(extract_year_season)
-st.write("Columns in df:", df.columns.tolist())
+#st.write("Columns in df:", df.columns.tolist())
 season_counts = df.groupby('parsed_year')['parsed_season'].nunique()
 single_season_years = season_counts[season_counts == 1].index
 user_data['parsed_season'] = user_data.apply(
@@ -128,4 +128,5 @@ ax.set_xlabel("Competition")
 ax.set_ylabel(f"{lift} ({unit})")
 ax.set_title(f"{lift} Progress Over Time")
 plt.xticks(rotation=45)
-st.pyplot(fig)
+plt.tight_layout()
+st.pyplot(fig, bbox_inches='tight')
