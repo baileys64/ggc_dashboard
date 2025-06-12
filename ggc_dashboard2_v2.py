@@ -23,10 +23,7 @@ def load_data():
     df = pd.read_csv(url)
 
     # Apply year/season parsing
-    parsed = df["Competition"].apply(extract_year_season)
-    parsed.columns = ["parsed_year", "parsed_season"]
-    df["parsed_year"] = parsed[0]
-    df["parsed_season"] = parsed[1]
+    df[["parsed_year", "parsed_season"]] = df["Competition"].apply(extract_year_season)
 
     # Handle single-season years
     season_counts = df.groupby("parsed_year")["parsed_season"].nunique()
